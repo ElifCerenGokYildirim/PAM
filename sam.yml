@@ -1,4 +1,4 @@
-name: diet
+name: sam
 channels:
   - pytorch
   - nvidia
@@ -158,4 +158,3 @@ dependencies:
       - six==1.16.0
       - threadpoolctl==3.5.0
       - tqdm==4.66.1
-prefix: /home/ecerengok/.conda/envs/diet
