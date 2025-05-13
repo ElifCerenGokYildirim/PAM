@@ -1,4 +1,4 @@
-# Slim Adaptation Modules (SAM) for Efficient Class-Incremental Learning
+# Slim Adaptation Modules for Pre-Trained Model based Class-Incremental Learning
 
 ## 📄 Abstract
 
