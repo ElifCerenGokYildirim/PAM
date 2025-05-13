@@ -11,9 +11,7 @@ We propose ‘Slim Adaptation Modules’ (SAM) a sparse, task-specific last laye
 
 Extensive experiments on diverse benchmarks demonstrate that our slim design not only mitigates catastrophic forgetting but also consistently surpasses state-of-the art methods, illustrating its robust and resource-efficient adaptation.
 
-<p align="center">
-  <img src="sam.png" alt="SAM Method Overview" width="600"/>
-</p>
+![SAM Method Overview](./sam.png)
 
 ---
 
