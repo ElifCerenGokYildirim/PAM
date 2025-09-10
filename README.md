@@ -2,9 +2,9 @@
 
 ## 📄 Abstract
 
-Class-incremental learning (CIL) is crucial for developing adaptive systems that can integrate new knowledge without forgetting previously acquired information. To tackle the challenge of **catastrophic forgetting**, recent state-of-the-art methods have predominantly relied on large-scale pre-trained architectures such as Vision Transformers, often overlooking the potential of pre-trained yet lightweight ConvNets particularly ResNet models.
+Class-incremental learning (CIL) is crucial for developing adaptive systems that can integrate new knowledge without forgetting previously acquired information. While recent research in CIL has primarily focused on adapting pre-trained foundation models to solve catastrophic forgetting, it remains unclear how well these methods actually perform compared to lightweight convolutional networks. Without such comparisons, it is difficult to know whether recent advances truly surpass a strong ConvNet-based baseline.
 
-We propose ‘Slim Adaptation Modules’ (SAM) a sparse, task-specific last layer of ResNet that enables rapid adaptation while keeping rest of the pre-trained model frozen. By leveraging this structured sparsity and modularity, SAM achieves:
+To address this gap, we propose a baseline that is called ‘Slim Adaptation Modules’ (SAM) a sparse, task-specific last layer of ResNet that enables rapid adaptation while keeping rest of the pre-trained model frozen. By leveraging this structured sparsity and modularity, SAM achieves:
 
 - **~5× reduction in trainable parameters**
 - **~6× reduction in total parameters**
