@@ -10,6 +10,7 @@ from torchvision import models
 from data_manager import DataManager
 from model import TaskSpecificResNet
 import logging
+from collections import Counter
 
 class SAM:
     def __init__(self, dataset_name, epochs, shuffle, seed, increment, freeze, lr, threshold, lamda, temperature, sparsity):
@@ -338,29 +339,122 @@ class SAM:
                 for _, data, target in test_loader:
                     data, target = data.to(self.device), target.to(self.device)
 
+                    # Forward once through shared layers
+                    shared_output = self.model.shared_layers(data)
+
                     # Find best task WITHOUT using labels
                     best_task = None
                     max_confidence = -float('inf')
 
                     # Choose task based on model confidence
                     for potential_task in self.task_to_block_map.keys():
-                        _, output = self.model(data, task_id=self.task_to_block_map[potential_task])
-                        probabilities = torch.softmax(output, dim=1)
+                        #_, output = self.model(data, task_id=self.task_to_block_map[potential_task])
+                        #probabilities = torch.softmax(output, dim=1)
+
+                        block = self.model.task_specific_blocks[str(self.task_to_block_map[potential_task])]
+                        features = block(shared_output)
+                        logits = self.model.classification_head(features)
+                        probabilities = torch.softmax(logits, dim=1)
+
                         confidence = torch.max(probabilities, dim=1).values.mean().item()
 
                         if confidence > max_confidence:
                             max_confidence = confidence
                             best_task = potential_task
+                            best_features = features
 
                     # Run inference with selected task
-                    _, output = self.model(data, task_id=self.task_to_block_map[best_task])
-                    _, predicted = torch.max(output, dim=1)
+                    #_, output = self.model(data, task_id=self.task_to_block_map[best_task])
+                    logits = self.model.classification_head(best_features)
+                    _, predicted = torch.max(logits, dim=1)
+                    #_, predicted = torch.max(output, dim=1)
 
                     # Now compute accuracy
                     correct += (predicted == target).sum().item()
                     samples += target.size(0)
 
                     logging.info(f"Selected task {best_task} for batch")
+
+            accuracy = 100 * correct / samples
+            task_accs.append(accuracy)
+            logging.info(f'Task {current_task} Accuracy: {accuracy:.2f}%')
+
+        incremental_acc = sum(task_accs) / len(task_accs)
+        logging.info(f'Incremental Accuracy after Task {task_id}: {incremental_acc:.2f}%')
+        return task_accs
+
+    def evaluate_with_ensemble_but_weighted(self, task_id):
+        self.model.eval()
+        task_accs = []
+
+        for current_task in range(task_id + 1):
+            test_dataset = self.data_manager.get_dataset(
+                indices=np.arange(0, (current_task + 1) * self.increment),
+                source='test',
+                mode='test'
+            )
+            test_loader = DataLoader(test_dataset, batch_size=128, shuffle=False)
+
+            correct = 0
+            samples = 0
+
+            with torch.no_grad():
+                for _, data, target in test_loader:
+                    data, target = data.to(self.device), target.to(self.device)
+                    # Get unique class IDs in this batch
+                    unique_targets = torch.unique(target)
+                    num_unique_targets = unique_targets.numel()
+
+                    print(f"Batch has {num_unique_targets} unique targets: {unique_targets.tolist()}")
+
+
+                    # Forward once through shared layers
+                    shared_output = self.model.shared_layers(data)
+
+                    block_logits = {}
+                    block_confidences = {}
+
+                    # Collect logits and confidences from each block
+                    for potential_task in self.task_to_block_map.keys():
+                        block = self.model.task_specific_blocks[str(self.task_to_block_map[potential_task])]
+                        features = block(shared_output)
+                        logits = self.model.classification_head(features)
+                        probs = torch.softmax(logits, dim=1)
+
+                        confidence = torch.max(probs, dim=1).values.mean().item()
+
+                        block_logits[potential_task] = logits
+                        block_confidences[potential_task] = confidence
+
+                    # Find the most confident block
+                    best_task = max(block_confidences, key=block_confidences.get)
+
+                    # Assign weights
+                    weights = {}
+                    num_blocks = len(block_confidences)
+                    for task in block_confidences:
+                        if task == best_task:
+                            weights[task] = 0.5  # 90% to best block
+                        else:
+                            # Remaining 10% equally split among other blocks
+                            weights[task] = 0.5 / (num_blocks - 1) if num_blocks > 1 else 0.0
+
+                    # Weighted ensemble of logits
+                    weighted_logits = None
+                    for task, logits in block_logits.items():
+                        w = weights[task]
+                        if weighted_logits is None:
+                            weighted_logits = w * logits
+                        else:
+                            weighted_logits += w * logits
+
+                    # Final prediction
+                    _, predicted = torch.max(weighted_logits, dim=1)
+
+                    correct += (predicted == target).sum().item()
+                    samples += target.size(0)
+
+                    logging.info(f"Most confident task {best_task} (70% weight) used in ensemble for batch")
 
             accuracy = 100 * correct / samples
             task_accs.append(accuracy)
