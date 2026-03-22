@@ -4,7 +4,7 @@
 
 The continual learning literature has rapidly shifted from traditional class incremental learning (CIL) techniques to foundation model (FM)-based CIL methods without a clear understanding of how these newer approaches compare to strong, lightweight convolutional baselines. This abrupt transition has created a substantial methodological gap, making it difficult to assess whether recent FM-based CIL progress reflects genuine advances or merely the absence of rigorous baselines. To address this gap, we introduce Pruned Adaptation Modules (PAM), a simple yet effective method that freezes the vast majority of the pre-trained ResNet while enabling scalable continual adaptation through sparse task-specific layers. PAM yields up to a ~5×reduction in trainable parameters and a ~6×reduction in total parameters, significantly reducing the cost of continual updates. Across diverse benchmarks, PAM consistently mitigates catastrophic forgetting and outperforms state-of-the-art FM-based CIL approaches. Our findings position PAM as a strong and transparent baseline that helps bridge the gap between traditional and FM-based CIL, guiding future research for a more accurate assessment of true progress in continual adaptation.
 
-![SAM Method Overview](./sam.png)
+![SAM Method Overview](./pam.png)
 
 ---
 
@@ -28,7 +28,7 @@ All experiments can be run using the `main.py` script. Below is a summary of the
 
 ## 🧪 Environment Setup
 
-All experiments were conducted using the environment defined in [`sam.yml`](./sam.yml).
+All experiments were conducted using the environment defined in [`sam.yml`](./pam.yml).
 
 To ensure reproducibility, please create and activate the conda environment using the provided `sam.yml` file:
 
