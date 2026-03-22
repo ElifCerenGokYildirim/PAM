@@ -12,7 +12,7 @@ from model import TaskSpecificResNet
 import logging
 from collections import Counter
 
-class SAM:
+class PAM:
     def __init__(self, dataset_name, epochs, shuffle, seed, increment, freeze, lr, threshold, lamda, temperature, sparsity):
         self.data_manager = DataManager(dataset_name, shuffle, seed, increment, increment)
         self.known_classes = 0
