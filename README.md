@@ -28,9 +28,9 @@ All experiments can be run using the `main.py` script. Below is a summary of the
 
 ## 🧪 Environment Setup
 
-All experiments were conducted using the environment defined in [`sam.yml`](./pam.yml).
+All experiments were conducted using the environment defined in [`pam.yml`](./pam.yml).
 
-To ensure reproducibility, please create and activate the conda environment using the provided `sam.yml` file:
+To ensure reproducibility, please create and activate the conda environment using the provided `pam.yml` file:
 
 ```bash
 conda env create -f sam.yml
