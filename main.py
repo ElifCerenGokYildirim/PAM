@@ -1,7 +1,7 @@
 import logging
 import random
 import torch
-from sam import SAM
+from pam import PAM
 from toolkit import set_logger
 import numpy as np
 import time
