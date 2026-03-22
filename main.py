@@ -55,7 +55,7 @@ def main():
         for eval_task, acc in enumerate(task_accuracies):
             acc_matrix[task, eval_task] = acc  # Store accuracy in the matrix
 
-        sam.after_task()
+        pam.after_task()
     logging.info("\nFinal Incremental Accuracy Matrix:")
     logging.info(acc_matrix)
 
