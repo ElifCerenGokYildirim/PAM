@@ -36,22 +36,22 @@ def main():
 
     set_logger(dataset_name, num_tasks, seed, freeze, lr, threshold, distill_type, lamda, temperature, sparsity, epoch, model)
 
-    sam = SAM(dataset_name, epoch, shuffle, seed, increment, freeze, lr, threshold, lamda, temperature, sparsity)
+    pam = PAM(dataset_name, epoch, shuffle, seed, increment, freeze, lr, threshold, lamda, temperature, sparsity)
     # Initialize accuracy matrix
     acc_matrix = np.zeros((num_tasks, num_tasks), dtype=float)
     test_times = []  # <--- Store per-task test times here
 
     for task in range(num_tasks):
-        sam.train()
+        pam.train()
         # Time only the evaluation step
         start = time.time()
-        task_accuracies = sam.evaluate_with_confidence(task)
+        task_accuracies = pam.evaluate_with_confidence(task)
         end = time.time()
         elapsed = end - start
         test_times.append(elapsed)
         logging.info(f"Test time after learning up until task {task}: {elapsed:.4f} seconds")
-        #task_accuracies = sam.evaluate_with_similarity(task)
-        #task_accuracies = sam.evaluate_with_til_setup(task)
+        #task_accuracies = pam.evaluate_with_similarity(task)
+        #task_accuracies = pam.evaluate_with_til_setup(task)
         for eval_task, acc in enumerate(task_accuracies):
             acc_matrix[task, eval_task] = acc  # Store accuracy in the matrix
 
